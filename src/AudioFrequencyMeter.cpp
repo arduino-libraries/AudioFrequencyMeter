@@ -30,12 +30,14 @@
 #define MIDPOINT    127
 #define TOPPOINT    255
 
-const int8_t __slopeTollerance = SLOPE_TOLLERANCE;
-const int __timerTollerance = TIMER_TOLLERANCE;
-const int __amplitudeThreshold = AMPLITUDE_THRESHOLD;
+int8_t __slopeTolerance = SLOPE_TOLERANCE;
+int __timerTolerance = TIMER_TOLERANCE;
+int __amplitudeThreshold = AMPLITUDE_THRESHOLD;
 
-bool clipping;
-int clippingPin;
+bool __clipping;
+int __clippingPin;
+
+uint32_t __samplePin;																// Pin used to sample the signal
 
 uint32_t __sampleRate;                              // ADC sample rate
 
@@ -60,15 +62,16 @@ int __maxAmplitude;                                 // Variable to store the max
 
 int __checkMaxAmp;
 
-void AudioFrequencyMeter::begin(uint32_t sampleRate)
+void AudioFrequencyMeter::begin(uint32_t ulPin, uint32_t sampleRate)
 {
 #ifdef DEBUG
  	pinMode(11, OUTPUT);
 #endif
+
   __sampleRate = sampleRate;
   analogRead(A0);
   ADCdisable();
-  ADCconfigure();
+  ADCconfigure(ulPin);
   ADCenable();
   tcConfigure(sampleRate);
   tcEnable();
@@ -83,24 +86,41 @@ void AudioFrequencyMeter::end()
 
 void AudioFrequencyMeter::setClippingPin(int pin)
 {
-  clippingPin = pin;
-  pinMode(clippingPin, OUTPUT);
+  __clippingPin = pin;
+  pinMode(__clippingPin, OUTPUT);
 }
 
 void AudioFrequencyMeter::checkClipping()
 {
-  if (clipping) {
-    digitalWrite(clippingPin, LOW);
-    clipping = false;
+  if (__clipping) {
+    digitalWrite(__clippingPin, LOW);
+    __clipping = false;
   }
 }
 
+void AudioFrequencyMeter::setAmplitudeThreshold(int threshold)
+{
+	__amplitudeThreshold = threshold;
+}
+
+void AudioFrequencyMeter::setTimerTolerance(int tolerance)
+{
+	__timerTolerance = tolerance;
+}
+
+void AudioFrequencyMeter::setSlopeTolerance(int8_t tolerance)
+{
+	__slopeTolerance = tolerance;
+}
+    
 float AudioFrequencyMeter::getFrequency()
 {
   if (__checkMaxAmp > __amplitudeThreshold) {
     __frequency = (float)(((float) __sampleRate) / ((float) __period));
+	return __frequency;
   }
-  return __frequency;
+  else
+	  return -1;
 }
 
 /*
@@ -109,8 +129,8 @@ float AudioFrequencyMeter::getFrequency()
 
 void AudioFrequencyMeter::initializeVariables()
 {
-  clipping = false;
-  clippingPin = NOT_INITIALIZED;
+  __clipping = false;
+  __clippingPin = NOT_INITIALIZED;
   __newData = 0;
   __prevData = 0;
   __time = 0;
@@ -119,10 +139,10 @@ void AudioFrequencyMeter::initializeVariables()
   __noMatch = 0;
   __amplitudeTimer = 0;
   __maxAmplitude = 0;
-  __checkMaxAmp;
+  __checkMaxAmp = 0;
 }
 
-void AudioFrequencyMeter::ADCconfigure()
+void AudioFrequencyMeter::ADCconfigure(uint32_t ulPin)
 {
   ADC->CTRLB.reg = ADC_CTRLB_PRESCALER_DIV4 |         // Divide Clock by 8.
                    ADC_CTRLB_RESSEL_8BIT;            	// 8 bits resolution
@@ -132,6 +152,24 @@ void AudioFrequencyMeter::ADCconfigure()
   ADC->SAMPCTRL.reg = 0x1F;                           // Set max Sampling Time Length
   while (ADCisSyncing())
     ;
+    
+  ADCsetMux(ulPin);
+}
+
+void AudioFrequencyMeter::ADCsetMux(uint32_t ulPin)
+{
+  if ( ulPin < A0 )
+  {
+    ulPin += A0;
+  }
+  
+	__samplePin = ulPin;
+	
+  pinPeripheral(ulPin, g_APinDescription[ulPin].ulPinType);
+  
+  while (ADCisSyncing())
+    ;
+  ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[ulPin].ulADCChannelNumber; // Selection for the positive ADC input
 }
 
 bool ADCisSyncing()
@@ -217,8 +255,8 @@ void AudioFrequencyMeter::tcDisable()
 
 uint8_t ADCread()
 {
-  uint32_t returnValue;
-  digitalWrite(12, HIGH);
+  uint8_t returnValue;
+
   while (ADCisSyncing())
     ;
 
@@ -231,7 +269,6 @@ uint8_t ADCread()
     ;
 
   ADC->SWTRIG.bit.START = 0;
-  digitalWrite(12, LOW);
 
   return returnValue;
 }
@@ -246,13 +283,13 @@ void TC5_Handler (void)
   digitalWrite(11, LOW);
 #endif
   __prevData = __newData;
-  __newData = ADCread();
+  __newData = analogRead(__samplePin);
 
   if ((__prevData < MIDPOINT) && (__newData >= MIDPOINT)) {
 
     __newSlope = __newData - __prevData;
 
-    if (abs(__newSlope - __maxSlope) < __slopeTollerance) {
+    if (abs(__newSlope - __maxSlope) < __slopeTolerance) {
       __slope[__arrayIndex] = __newSlope;
       __timer[__arrayIndex] = __time;
       __time = 0;
@@ -263,7 +300,7 @@ void TC5_Handler (void)
         __noMatch = 0;
         __arrayIndex++;
       }
-      else if ((abs(__timer[0] - __timer[__arrayIndex]) < __timerTollerance) && (abs(__slope[0] - __newSlope) < __slopeTollerance)) { //if __timer duration and __slopes match
+      else if ((abs(__timer[0] - __timer[__arrayIndex]) < __timerTolerance) && (abs(__slope[0] - __newSlope) < __slopeTolerance)) { //if __timer duration and __slopes match
         __totalTimer = 0;
         for (uint8_t i = 0; i < __arrayIndex; i++) {
           __totalTimer += __timer[i];
@@ -304,10 +341,10 @@ void TC5_Handler (void)
   }
 
 
-  if (__newData == BOTTOMPOINT || __newData == TOPPOINT) { //if clipping
-    if (clippingPin > 0) {
-      digitalWrite(clippingPin, HIGH);
-      clipping = true;
+  if (__newData == BOTTOMPOINT || __newData == TOPPOINT) { //if __clipping
+    if (__clippingPin > 0) {
+      digitalWrite(__clippingPin, HIGH);
+      __clipping = true;
     }
   }
 
@@ -329,3 +366,4 @@ void TC5_Handler (void)
 #ifdef __cplusplus
 }
 #endif
+

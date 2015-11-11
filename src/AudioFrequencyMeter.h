@@ -28,14 +28,15 @@
 
 #define ARRAY_DEPTH 				20
 #define AMPLITUDE_THRESHOLD	30
-#define TIMER_TOLLERANCE		10
-#define SLOPE_TOLLERANCE		 3
+#define TIMER_TOLERANCE			10
+#define SLOPE_TOLERANCE		 	3
 #define NOT_INITIALIZED			-1
 #define TIMEOUT							1000
 
 //#define DEBUG								1
 
 #include "Arduino.h"
+#include "wiring_private.h"
 
 bool ADCisSyncing(void);
 uint8_t ADCread();
@@ -44,15 +45,21 @@ class AudioFrequencyMeter {
   public:
 
     AudioFrequencyMeter(void) {};
-    void begin(uint32_t sampleRate);
+    void begin(uint32_t ulPin, uint32_t sampleRate);
     void end(void);
     void setClippingPin(int pin);
     void checkClipping(void);
+    
+    void setAmplitudeThreshold(int threshold);
+    void setTimerTolerance(int tolerance);
+    void setSlopeTolerance(int8_t tolerance);
+    
     float getFrequency(void);
     
   private:
   	void initializeVariables(void);
-		void ADCconfigure(void);
+		void ADCconfigure(uint32_t ulPin);
+		void ADCsetMux(uint32_t ulPin);
     void ADCenable(void);
     void ADCdisable(void);
     
@@ -62,3 +69,4 @@ class AudioFrequencyMeter {
     void tcDisable(void);
     void tcReset(void);
 };
+
