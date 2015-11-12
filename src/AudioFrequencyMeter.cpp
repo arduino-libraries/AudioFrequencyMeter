@@ -26,22 +26,18 @@
 
 #include "AudioFrequencyMeter.h"
 
-#define BOTTOMPOINT  0
-#define MIDPOINT    127
-#define TOPPOINT    255
-
 int8_t __slopeTolerance = SLOPE_TOLERANCE;
 int __timerTolerance = TIMER_TOLERANCE;
-int __amplitudeThreshold = AMPLITUDE_THRESHOLD;
+uint8_t __amplitudeThreshold = AMPLITUDE_THRESHOLD;
 
 bool __clipping;
 int __clippingPin;
 
-uint32_t __samplePin;																// Pin used to sample the signal
+uint32_t __samplePin;                               // Pin used to sample the signal
 
 uint32_t __sampleRate;                              // ADC sample rate
 
-uint8_t  __newData, __prevData;                     // Variables to store ADC result
+int  __newData, __prevData;                         // Variables to store ADC result
 
 unsigned int __time, __totalTimer;                  // Variables used to compute period
 unsigned int __period;
@@ -59,19 +55,23 @@ int8_t __noMatch;                                   // Variable to store non-mat
 
 unsigned int __amplitudeTimer;                      // Variable to reset trigger
 int __maxAmplitude;                                 // Variable to store the max detected amplitude
+int __newMaxAmplitude;                              // Variable used to check if __maxAmplitude must be updated
 
-int __checkMaxAmp;
+int __checkMaxAmp;                                  // Used to update the new frequency in base of the AMplitude threshold
+
+float __minFrequency;                               // Variable to store the minimum frequency that can be applied in input
+float __maxFrequency;                               // Variable to store the maximum frequency that can be applied in input
 
 void AudioFrequencyMeter::begin(uint32_t ulPin, uint32_t sampleRate)
 {
 #ifdef DEBUG
- 	pinMode(11, OUTPUT);
+  pinMode(11, OUTPUT);
 #endif
-
-  __sampleRate = sampleRate;
-  analogRead(A0);
+  __samplePin = ulPin;                              // Store ADC channel to sample
+  __sampleRate = sampleRate;                        // Store sample rate value
+  analogRead(A0);                                   // To start setting-up the ADC
   ADCdisable();
-  ADCconfigure(ulPin);
+  ADCconfigure();
   ADCenable();
   tcConfigure(sampleRate);
   tcEnable();
@@ -86,7 +86,7 @@ void AudioFrequencyMeter::end()
 
 void AudioFrequencyMeter::setClippingPin(int pin)
 {
-  __clippingPin = pin;
+  __clippingPin = pin;                              // Store the clipping pin value
   pinMode(__clippingPin, OUTPUT);
 }
 
@@ -98,29 +98,39 @@ void AudioFrequencyMeter::checkClipping()
   }
 }
 
-void AudioFrequencyMeter::setAmplitudeThreshold(int threshold)
+void AudioFrequencyMeter::setAmplitudeThreshold(uint8_t threshold)
 {
-	__amplitudeThreshold = threshold;
+  __amplitudeThreshold = abs(MIDPOINT - threshold);
 }
 
 void AudioFrequencyMeter::setTimerTolerance(int tolerance)
 {
-	__timerTolerance = tolerance;
+  __timerTolerance = tolerance;
 }
 
 void AudioFrequencyMeter::setSlopeTolerance(int8_t tolerance)
 {
-	__slopeTolerance = tolerance;
+  __slopeTolerance = tolerance;
 }
-    
+
+void AudioFrequencyMeter::setBandwidth(float minFrequency, float maxFrequency)
+{
+  __minFrequency = minFrequency;
+  __maxFrequency = maxFrequency;
+}
+
 float AudioFrequencyMeter::getFrequency()
 {
   if (__checkMaxAmp > __amplitudeThreshold) {
-    __frequency = (float)(((float) __sampleRate) / ((float) __period));
-	return __frequency;
+    __frequency = (float)(__sampleRate / __period);
+    
+    if ((__frequency < __minFrequency) || (__frequency > __maxFrequency))
+      return -1;
+    else
+      return __frequency;
   }
   else
-	  return -1;
+    return -1;
 }
 
 /*
@@ -132,7 +142,7 @@ void AudioFrequencyMeter::initializeVariables()
   __clipping = false;
   __clippingPin = NOT_INITIALIZED;
   __newData = 0;
-  __prevData = 0;
+  __prevData = MIDPOINT;
   __time = 0;
   __arrayIndex = 0;
   __maxSlope = 0;
@@ -140,36 +150,29 @@ void AudioFrequencyMeter::initializeVariables()
   __amplitudeTimer = 0;
   __maxAmplitude = 0;
   __checkMaxAmp = 0;
+  __minFrequency = MIN_FREQUENCY;
+  __maxFrequency = MAX_FREQUENCY;
 }
 
-void AudioFrequencyMeter::ADCconfigure(uint32_t ulPin)
+void AudioFrequencyMeter::ADCconfigure()
 {
-  ADC->CTRLB.reg = ADC_CTRLB_PRESCALER_DIV4 |         // Divide Clock by 8.
-                   ADC_CTRLB_RESSEL_8BIT;            	// 8 bits resolution
+  ADC->CTRLB.bit.RESSEL = ADC_CTRLB_RESSEL_8BIT_Val;
+  while (ADCisSyncing())
+    ;
+
+  ADC->CTRLB.bit.PRESCALER = ADC_CTRLB_PRESCALER_DIV4_Val;     // Divide Clock by 4 -> ~200kHz
+  while (ADCisSyncing())
+    ;
+
 
   while (ADCisSyncing())
     ;
-  ADC->SAMPCTRL.reg = 0x1F;                           // Set max Sampling Time Length
-  while (ADCisSyncing())
-    ;
-    
-  ADCsetMux(ulPin);
-}
 
-void AudioFrequencyMeter::ADCsetMux(uint32_t ulPin)
-{
-  if ( ulPin < A0 )
-  {
-    ulPin += A0;
-  }
-  
-	__samplePin = ulPin;
-	
-  pinPeripheral(ulPin, g_APinDescription[ulPin].ulPinType);
-  
+  ADC->SAMPCTRL.reg = 0x1F;                           				// Set max Sampling Time Length
   while (ADCisSyncing())
     ;
-  ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[ulPin].ulADCChannelNumber; // Selection for the positive ADC input
+
+  ADCsetMux(__samplePin);
 }
 
 bool ADCisSyncing()
@@ -179,16 +182,30 @@ bool ADCisSyncing()
 
 void AudioFrequencyMeter::ADCdisable()
 {
-  ADC->CTRLA.bit.ENABLE = 0x00;                   		// Disable ADC
+  ADC->CTRLA.bit.ENABLE = 0x00;                       				// Disable ADC
   while (ADCisSyncing())
     ;
 }
 
 void AudioFrequencyMeter::ADCenable()
 {
-  ADC->CTRLA.bit.ENABLE = 0x01;                   		// Enable ADC
+  ADC->CTRLA.bit.ENABLE = 0x01;                       				// Enable ADC
   while (ADCisSyncing())
     ;
+}
+
+void AudioFrequencyMeter::ADCsetMux(uint32_t ulPin)
+{
+  if ( ulPin < A0 )
+  {
+    ulPin += A0;
+  }
+
+  pinPeripheral(ulPin, g_APinDescription[ulPin].ulPinType);
+
+  while (ADCisSyncing())
+    ;
+  ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[ulPin].ulADCChannelNumber; // Selection for the positive ADC input
 }
 
 void AudioFrequencyMeter::tcConfigure(uint32_t sampleRate)
@@ -252,7 +269,6 @@ void AudioFrequencyMeter::tcDisable()
     ;
 }
 
-
 uint8_t ADCread()
 {
   uint8_t returnValue;
@@ -262,8 +278,8 @@ uint8_t ADCread()
 
   ADC->SWTRIG.bit.START = 1;
 
-  while ( ADC->INTFLAG.bit.RESRDY == 0 );   // Waiting for conversion to complete
-  returnValue = ADC->RESULT.reg;            // Store the value
+  while ( ADC->INTFLAG.bit.RESRDY == 0 );   					// Waiting for conversion to complete
+  returnValue = ADC->RESULT.reg;            					// Store the value
 
   while (ADCisSyncing())
     ;
@@ -279,11 +295,8 @@ extern "C" {
 
 void TC5_Handler (void)
 {
-#ifdef DEBUG
-  digitalWrite(11, LOW);
-#endif
   __prevData = __newData;
-  __newData = analogRead(__samplePin);
+  __newData = ADCread();
 
   if ((__prevData < MIDPOINT) && (__newData >= MIDPOINT)) {
 
@@ -293,26 +306,21 @@ void TC5_Handler (void)
       __slope[__arrayIndex] = __newSlope;
       __timer[__arrayIndex] = __time;
       __time = 0;
+      
       if (__arrayIndex == 0) {
-#ifdef DEBUG
- 				digitalWrite(11, HIGH);
-#endif
         __noMatch = 0;
         __arrayIndex++;
       }
-      else if ((abs(__timer[0] - __timer[__arrayIndex]) < __timerTolerance) && (abs(__slope[0] - __newSlope) < __slopeTolerance)) { //if __timer duration and __slopes match
+      else if ((abs(__timer[0] - __timer[__arrayIndex]) < __timerTolerance) && (abs(__slope[0] - __newSlope) < __slopeTolerance)) {
         __totalTimer = 0;
         for (uint8_t i = 0; i < __arrayIndex; i++) {
           __totalTimer += __timer[i];
         }
         __period = __totalTimer;
-        
+
         __timer[0] = __timer[__arrayIndex];
         __slope[0] = __slope[__arrayIndex];
         __arrayIndex = 1;
-#ifdef DEBUG
- 				digitalWrite(11, HIGH);
-#endif
         __noMatch = 0;
       }
       else {
@@ -340,30 +348,32 @@ void TC5_Handler (void)
     }
   }
 
-
-  if (__newData == BOTTOMPOINT || __newData == TOPPOINT) { //if __clipping
-    if (__clippingPin > 0) {
+  if (__clippingPin > 0)
+  {
+    if (__newData == BOTTOMPOINT || __newData == TOPPOINT) {
       digitalWrite(__clippingPin, HIGH);
       __clipping = true;
     }
   }
 
-  __time++;															// Incremented at sampleRate
-  __amplitudeTimer++;										// Incremented at sampleRate
+  __time++;                             // Incremented at sampleRate
+  __amplitudeTimer++;                   // Incremented at sampleRate
 
-  if (abs(MIDPOINT - __newData) > __maxAmplitude) {
-    __maxAmplitude = abs(MIDPOINT - __newData);
+  __newMaxAmplitude = abs(MIDPOINT - __newData);
+
+  if (__newMaxAmplitude > __maxAmplitude) {
+    __maxAmplitude = __newMaxAmplitude;
   }
-  if (__amplitudeTimer >= TIMEOUT) {
+
+  if (__amplitudeTimer >= TIMER_TIMEOUT) {
     __amplitudeTimer = 0;
     __checkMaxAmp = __maxAmplitude;
     __maxAmplitude = 0;
   }
 
-  TC5->COUNT16.INTFLAG.bit.MC0 = 1;		// Clear interrupt
+  TC5->COUNT16.INTFLAG.bit.MC0 = 1;     // Clear interrupt
 }
 
 #ifdef __cplusplus
 }
 #endif
-
