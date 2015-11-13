@@ -57,7 +57,7 @@ class AudioFrequencyMeter {
     
     void setAmplitudeThreshold(uint8_t threshold);
     void setTimerTolerance(int tolerance);
-    void setSlopeTolerance(int8_t tolerance);
+    void setSlopeTolerance(int tolerance);
     void setBandwidth(float minFrequency, float maxFrequency);
     
     float getFrequency(void);

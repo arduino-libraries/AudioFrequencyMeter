@@ -26,7 +26,7 @@
 
 #include "AudioFrequencyMeter.h"
 
-int8_t __slopeTolerance = SLOPE_TOLERANCE;
+int __slopeTolerance = SLOPE_TOLERANCE;
 int __timerTolerance = TIMER_TOLERANCE;
 uint8_t __amplitudeThreshold = AMPLITUDE_THRESHOLD;
 
@@ -108,7 +108,7 @@ void AudioFrequencyMeter::setTimerTolerance(int tolerance)
   __timerTolerance = tolerance;
 }
 
-void AudioFrequencyMeter::setSlopeTolerance(int8_t tolerance)
+void AudioFrequencyMeter::setSlopeTolerance(int tolerance)
 {
   __slopeTolerance = tolerance;
 }
