@@ -38,4 +38,4 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 * setBandwidth(float minFrequency, float maxFrequency) : set the range of frequencies for which the detected frequency is valid. Default values for now are 60Hz - 1500Hz. This must be improved 
 
-* getFrequecncy : return the value of the detected frequency if it is above the threshold defined by setAmplitudeThreshold else -1
+* getFrequency : return the value of the detected frequency if it is above the threshold defined by setAmplitudeThreshold else -1
