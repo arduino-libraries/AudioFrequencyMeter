@@ -1,6 +1,6 @@
 = Audio Frequency Meter Library for Arduino =
 
-Allows the Arduino Zero to sample a generic input audio signal and get the foundamental pitch.
+Allows the Arduino Zero to sample a generic input audio signal and get the fundamental pitch.
 
 
 == License ==
