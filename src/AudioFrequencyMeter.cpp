@@ -160,7 +160,7 @@ void AudioFrequencyMeter::ADCconfigure()
   while (ADCisSyncing())
     ;
 
-  ADC->CTRLB.bit.PRESCALER = ADC_CTRLB_PRESCALER_DIV4_Val;     // Divide Clock by 4 -> ~200kHz
+  ADC->CTRLB.bit.PRESCALER = ADC_CTRLB_PRESCALER_DIV8_Val;     // Divide Clock by 8 -> ~100kHz
   while (ADCisSyncing())
     ;
 
