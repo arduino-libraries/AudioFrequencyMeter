@@ -69,7 +69,7 @@ void AudioFrequencyMeter::begin(uint32_t ulPin, uint32_t sampleRate)
 #endif
   __samplePin = ulPin;                              // Store ADC channel to sample
   __sampleRate = sampleRate;                        // Store sample rate value
-  analogRead(A0);                                   // To start setting-up the ADC
+  analogRead(ulPin);                                // To start setting-up the ADC
   ADCdisable();
   ADCconfigure();
   ADCenable();
