@@ -232,6 +232,8 @@ void AudioFrequencyMeter::tcConfigure()
   while (tcIsSyncing())
     ;
 
+  sampleRate = SystemCoreClock / (TC5->COUNT16.CC[0].reg + 1);
+
   // Configure interrupt request
   NVIC_DisableIRQ(TC5_IRQn);
   NVIC_ClearPendingIRQ(TC5_IRQn);
