@@ -26,41 +26,41 @@
 
 #include "AudioFrequencyMeter.h"
 
-int __slopeTolerance = SLOPE_TOLERANCE;
-int __timerTolerance = TIMER_TOLERANCE;
-uint8_t __amplitudeThreshold = AMPLITUDE_THRESHOLD;
+static int __slopeTolerance = SLOPE_TOLERANCE;
+static int __timerTolerance = TIMER_TOLERANCE;
+static uint8_t __amplitudeThreshold = AMPLITUDE_THRESHOLD;
 
-bool __clipping;
-int __clippingPin;
+static bool __clipping;
+static int __clippingPin;
 
-uint32_t __samplePin;                               // Pin used to sample the signal
+static uint32_t __samplePin;                               // Pin used to sample the signal
 
-uint32_t __sampleRate;                              // ADC sample rate
+static uint32_t __sampleRate;                              // ADC sample rate
 
-int  __newData, __prevData;                         // Variables to store ADC result
+static int  __newData, __prevData;                         // Variables to store ADC result
 
-unsigned int __time, __totalTimer;                  // Variables used to compute period
-unsigned int __period;
+static unsigned int __time, __totalTimer;                  // Variables used to compute period
+static unsigned int __period;
 
-uint8_t __arrayIndex;                               // Index to save data in the correct position of the arrays
-int __timer[ARRAY_DEPTH];                           // Array to store trigger events
-int __slope[ARRAY_DEPTH];                           // Array to store changing in slope events
+static uint8_t __arrayIndex;                               // Index to save data in the correct position of the arrays
+static int __timer[ARRAY_DEPTH];                           // Array to store trigger events
+static int __slope[ARRAY_DEPTH];                           // Array to store changing in slope events
 
-float __frequency;                                  // Variable to store frequency result
+static float __frequency;                                  // Variable to store frequency result
 
-int __maxSlope;                                     // Variable to store max detected amplitude
-int __newSlope;                                     // Variable to store a new slope
+static int __maxSlope;                                     // Variable to store max detected amplitude
+static int __newSlope;                                     // Variable to store a new slope
 
-int8_t __noMatch;                                   // Variable to store non-matching trigger events
+static int8_t __noMatch;                                   // Variable to store non-matching trigger events
 
-unsigned int __amplitudeTimer;                      // Variable to reset trigger
-int __maxAmplitude;                                 // Variable to store the max detected amplitude
-int __newMaxAmplitude;                              // Variable used to check if __maxAmplitude must be updated
+static unsigned int __amplitudeTimer;                      // Variable to reset trigger
+static int __maxAmplitude;                                 // Variable to store the max detected amplitude
+static int __newMaxAmplitude;                              // Variable used to check if __maxAmplitude must be updated
 
-int __checkMaxAmp;                                  // Used to update the new frequency in base of the AMplitude threshold
+static int __checkMaxAmp;                                  // Used to update the new frequency in base of the AMplitude threshold
 
-float __minFrequency;                               // Variable to store the minimum frequency that can be applied in input
-float __maxFrequency;                               // Variable to store the maximum frequency that can be applied in input
+static float __minFrequency;                               // Variable to store the minimum frequency that can be applied in input
+static float __maxFrequency;                               // Variable to store the maximum frequency that can be applied in input
 
 void AudioFrequencyMeter::begin(uint32_t ulPin, uint32_t sampleRate)
 {
