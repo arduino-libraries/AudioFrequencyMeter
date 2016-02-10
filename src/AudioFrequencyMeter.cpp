@@ -120,16 +120,17 @@ void AudioFrequencyMeter::setBandwidth(float min, float max)
 
 float AudioFrequencyMeter::getFrequency()
 {
+  float frequency = -1;
+
   if (checkMaxAmp > amplitudeThreshold) {
-    float frequency = (float)(sampleRate / period);
+    frequency = (float)(sampleRate / period);
     
-    if ((frequency < minFrequency) || (frequency > maxFrequency))
-      return -1;
-    else
-      return frequency;
+    if ((frequency < minFrequency) || (frequency > maxFrequency)) {
+      frequency = -1;
+    }
   }
-  else
-    return -1;
+
+  return frequency;
 }
 
 /*
