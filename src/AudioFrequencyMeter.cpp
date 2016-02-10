@@ -168,7 +168,7 @@ void AudioFrequencyMeter::ADCconfigure()
   while (ADCisSyncing())
     ;
 
-  ADC->SAMPCTRL.reg = 0x1F;                           				// Set max Sampling Time Length
+  ADC->SAMPCTRL.reg = 0x1F;                                    // Set max Sampling Time Length
   while (ADCisSyncing())
     ;
 
@@ -182,14 +182,14 @@ bool ADCisSyncing()
 
 void AudioFrequencyMeter::ADCdisable()
 {
-  ADC->CTRLA.bit.ENABLE = 0x00;                       				// Disable ADC
+  ADC->CTRLA.bit.ENABLE = 0x00;                               // Disable ADC
   while (ADCisSyncing())
     ;
 }
 
 void AudioFrequencyMeter::ADCenable()
 {
-  ADC->CTRLA.bit.ENABLE = 0x01;                       				// Enable ADC
+  ADC->CTRLA.bit.ENABLE = 0x01;                               // Enable ADC
   while (ADCisSyncing())
     ;
 }
