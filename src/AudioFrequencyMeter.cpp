@@ -44,14 +44,14 @@ static int  newData, prevData;                           // Variables to store A
 static unsigned int time, totalTimer;                    // Variables used to compute period
 static volatile unsigned int period;
 
-static uint8_t arrayIndex;                               // Index to save data in the correct position of the arrays
+static int arrayIndex;                                   // Index to save data in the correct position of the arrays
 static int timer[ARRAY_DEPTH];                           // Array to store trigger events
 static int slope[ARRAY_DEPTH];                           // Array to store changing in slope events
 
 static int maxSlope;                                     // Variable to store max detected amplitude
 static int newSlope;                                     // Variable to store a new slope
 
-static int8_t noMatch;                                   // Variable to store non-matching trigger events
+static int noMatch;                                      // Variable to store non-matching trigger events
 
 static unsigned int amplitudeTimer;                      // Variable to reset trigger
 static int maxAmplitude;                                 // Variable to store the max detected amplitude
@@ -316,7 +316,7 @@ void TC5_Handler (void)
       }
       else if ((abs(timer[0] - timer[arrayIndex]) < timerTolerance) && (abs(slope[0] - newSlope) < slopeTolerance)) {
         totalTimer = 0;
-        for (uint8_t i = 0; i < arrayIndex; i++) {
+        for (int i = 0; i < arrayIndex; i++) {
           totalTimer += timer[i];
         }
         period = totalTimer;
