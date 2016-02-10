@@ -26,6 +26,13 @@
 
 #include "AudioFrequencyMeter.h"
 
+#define ARRAY_DEPTH             20
+#define NOT_INITIALIZED         -1
+#define TIMER_TIMEOUT           1000
+#define BOTTOMPOINT             0
+#define MIDPOINT                127
+#define TOPPOINT                255
+
 static int slopeTolerance = SLOPE_TOLERANCE;
 static int timerTolerance = TIMER_TOLERANCE;
 static uint8_t amplitudeThreshold = AMPLITUDE_THRESHOLD;

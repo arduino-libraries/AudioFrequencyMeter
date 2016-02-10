@@ -30,17 +30,11 @@
 
 #pragma once
 
-#define ARRAY_DEPTH             20
 #define AMPLITUDE_THRESHOLD     30
 #define TIMER_TOLERANCE         10
 #define SLOPE_TOLERANCE         3
-#define NOT_INITIALIZED         -1
-#define TIMER_TIMEOUT           1000
 #define MIN_FREQUENCY           60.00
 #define MAX_FREQUENCY           1500.00
-#define BOTTOMPOINT             0
-#define MIDPOINT                127
-#define TOPPOINT                255
 
 bool ADCisSyncing(void);
 uint8_t ADCread();
