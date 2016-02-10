@@ -35,14 +35,10 @@
 
 static int slopeTolerance = DEFAULT_SLOPE_TOLERANCE;
 static int timerTolerance = DEFAULT_TIMER_TOLERANCE;
-static uint8_t amplitudeThreshold = DEFAULT_AMPLITUDE_THRESHOLD;
+static int amplitudeThreshold = DEFAULT_AMPLITUDE_THRESHOLD;
 
 static bool clipping;
 static int clippingPin;
-
-static uint32_t samplePin;                               // Pin used to sample the signal
-
-static uint32_t sampleRate;                              // ADC sample rate
 
 static int  newData, prevData;                         // Variables to store ADC result
 
@@ -69,18 +65,15 @@ static int checkMaxAmp;                                  // Used to update the n
 static float minFrequency;                               // Variable to store the minimum frequency that can be applied in input
 static float maxFrequency;                               // Variable to store the maximum frequency that can be applied in input
 
-void AudioFrequencyMeter::begin(uint32_t ulPin, uint32_t rate)
+void AudioFrequencyMeter::begin(int pin, unsigned int rate)
 {
-#ifdef DEBUG
-  pinMode(11, OUTPUT);
-#endif
-  samplePin = ulPin;                              // Store ADC channel to sample
-  sampleRate = rate;                        // Store sample rate value
-  analogRead(ulPin);                                // To start setting-up the ADC
+  samplePin = pin;                              // Store ADC channel to sample
+  sampleRate = rate;                              // Store sample rate value
+  analogRead(pin);                              // To start setting-up the ADC
   ADCdisable();
   ADCconfigure();
   ADCenable();
-  tcConfigure(sampleRate);
+  tcConfigure();
   tcEnable();
 }
 
@@ -105,7 +98,7 @@ void AudioFrequencyMeter::checkClipping()
   }
 }
 
-void AudioFrequencyMeter::setAmplitudeThreshold(uint8_t threshold)
+void AudioFrequencyMeter::setAmplitudeThreshold(int threshold)
 {
   amplitudeThreshold = abs(MIDPOINT - threshold);
 }
@@ -179,7 +172,7 @@ void AudioFrequencyMeter::ADCconfigure()
   while (ADCisSyncing())
     ;
 
-  ADCsetMux(samplePin);
+  ADCsetMux();
 }
 
 bool ADCisSyncing()
@@ -201,21 +194,21 @@ void AudioFrequencyMeter::ADCenable()
     ;
 }
 
-void AudioFrequencyMeter::ADCsetMux(uint32_t ulPin)
+void AudioFrequencyMeter::ADCsetMux()
 {
-  if ( ulPin < A0 )
+  if ( samplePin < A0 )
   {
-    ulPin += A0;
+    samplePin += A0;
   }
 
-  pinPeripheral(ulPin, g_APinDescription[ulPin].ulPinType);
+  pinPeripheral(samplePin, g_APinDescription[samplePin].ulPinType);
 
   while (ADCisSyncing())
     ;
-  ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[ulPin].ulADCChannelNumber; // Selection for the positive ADC input
+  ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[samplePin].ulADCChannelNumber; // Selection for the positive ADC input
 }
 
-void AudioFrequencyMeter::tcConfigure(uint32_t sampleRate)
+void AudioFrequencyMeter::tcConfigure()
 {
   // Enable GCLK for TCC2 and TC5 (timer counter input clock)
   GCLK->CLKCTRL.reg = (uint16_t) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID(GCM_TC4_TC5)) ;

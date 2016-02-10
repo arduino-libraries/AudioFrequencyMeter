@@ -43,13 +43,13 @@ class AudioFrequencyMeter {
   public:
 
     AudioFrequencyMeter(void) {};
-    void begin(uint32_t ulPin, uint32_t sampleRate);
+    void begin(int ulPin, unsigned int sampleRate);
     void end(void);
     
     void setClippingPin(int pin);
     void checkClipping(void);
     
-    void setAmplitudeThreshold(uint8_t threshold);
+    void setAmplitudeThreshold(int threshold);
     void setTimerTolerance(int tolerance);
     void setSlopeTolerance(int tolerance);
     void setBandwidth(float minFrequency, float maxFrequency);
@@ -61,12 +61,16 @@ class AudioFrequencyMeter {
     void ADCconfigure();
     void ADCenable(void);
     void ADCdisable(void);
-    void ADCsetMux(uint32_t ulPin);
+    void ADCsetMux(void);
     
-    void tcConfigure(uint32_t sampleRate);
+    void tcConfigure(void);
     bool tcIsSyncing(void);
     void tcEnable(void);
     void tcDisable(void);
     void tcReset(void);
+
+  private:
+    int samplePin;           // Pin used to sample the signal
+    unsigned int sampleRate; // ADC sample rate
 };
 
