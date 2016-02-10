@@ -295,10 +295,6 @@ uint8_t ADCread()
   return returnValue;
 }
 
-#ifdef cplusplus
-extern "C" {
-#endif
-
 void TC5_Handler (void)
 {
   prevData = newData;
@@ -379,7 +375,3 @@ void TC5_Handler (void)
 
   TC5->COUNT16.INTFLAG.bit.MC0 = 1;     // Clear interrupt
 }
-
-#ifdef cplusplus
-}
-#endif
