@@ -49,8 +49,6 @@ static uint8_t arrayIndex;                               // Index to save data i
 static int timer[ARRAY_DEPTH];                           // Array to store trigger events
 static int slope[ARRAY_DEPTH];                           // Array to store changing in slope events
 
-static float frequency;                                  // Variable to store frequency result
-
 static int maxSlope;                                     // Variable to store max detected amplitude
 static int newSlope;                                     // Variable to store a new slope
 
@@ -61,9 +59,6 @@ static int maxAmplitude;                                 // Variable to store th
 static int newMaxAmplitude;                              // Variable used to check if maxAmplitude must be updated
 
 static int checkMaxAmp;                                  // Used to update the new frequency in base of the AMplitude threshold
-
-static float minFrequency;                               // Variable to store the minimum frequency that can be applied in input
-static float maxFrequency;                               // Variable to store the maximum frequency that can be applied in input
 
 void AudioFrequencyMeter::begin(int pin, unsigned int rate)
 {
@@ -122,7 +117,7 @@ void AudioFrequencyMeter::setBandwidth(float min, float max)
 float AudioFrequencyMeter::getFrequency()
 {
   if (checkMaxAmp > amplitudeThreshold) {
-    frequency = (float)(sampleRate / period);
+    float frequency = (float)(sampleRate / period);
     
     if ((frequency < minFrequency) || (frequency > maxFrequency))
       return -1;

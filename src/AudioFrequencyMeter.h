@@ -72,5 +72,8 @@ class AudioFrequencyMeter {
   private:
     int samplePin;           // Pin used to sample the signal
     unsigned int sampleRate; // ADC sample rate
+
+    float minFrequency;      // Variable to store the minimum frequency that can be applied in input
+    float maxFrequency;      // Variable to store the maximum frequency that can be applied in input
 };
 
