@@ -35,15 +35,14 @@
 
 static int slopeTolerance = DEFAULT_SLOPE_TOLERANCE;
 static int timerTolerance = DEFAULT_TIMER_TOLERANCE;
-static int amplitudeThreshold = DEFAULT_AMPLITUDE_THRESHOLD;
 
 static bool clipping;
 static int clippingPin;
 
-static int  newData, prevData;                         // Variables to store ADC result
+static int  newData, prevData;                           // Variables to store ADC result
 
-static unsigned int time, totalTimer;                  // Variables used to compute period
-static unsigned int period;
+static unsigned int time, totalTimer;                    // Variables used to compute period
+static volatile unsigned int period;
 
 static uint8_t arrayIndex;                               // Index to save data in the correct position of the arrays
 static int timer[ARRAY_DEPTH];                           // Array to store trigger events
@@ -58,13 +57,16 @@ static unsigned int amplitudeTimer;                      // Variable to reset tr
 static int maxAmplitude;                                 // Variable to store the max detected amplitude
 static int newMaxAmplitude;                              // Variable used to check if maxAmplitude must be updated
 
-static int checkMaxAmp;                                  // Used to update the new frequency in base of the AMplitude threshold
+static volatile int checkMaxAmp;                         // Used to update the new frequency in base of the AMplitude threshold
 
 void AudioFrequencyMeter::begin(int pin, unsigned int rate)
 {
   samplePin = pin;                              // Store ADC channel to sample
-  sampleRate = rate;                              // Store sample rate value
+  sampleRate = rate;                            // Store sample rate value
   analogRead(pin);                              // To start setting-up the ADC
+
+  amplitudeThreshold = DEFAULT_AMPLITUDE_THRESHOLD;
+
   ADCdisable();
   ADCconfigure();
   ADCenable();

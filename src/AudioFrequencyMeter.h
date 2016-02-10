@@ -43,7 +43,7 @@ class AudioFrequencyMeter {
   public:
 
     AudioFrequencyMeter(void) {};
-    void begin(int ulPin, unsigned int sampleRate);
+    void begin(int pin, unsigned int sampleRate);
     void end(void);
     
     void setClippingPin(int pin);
@@ -72,6 +72,8 @@ class AudioFrequencyMeter {
   private:
     int samplePin;           // Pin used to sample the signal
     unsigned int sampleRate; // ADC sample rate
+
+    int amplitudeThreshold;
 
     float minFrequency;      // Variable to store the minimum frequency that can be applied in input
     float maxFrequency;      // Variable to store the maximum frequency that can be applied in input
