@@ -33,9 +33,9 @@
 #define MIDPOINT                127
 #define TOPPOINT                255
 
-static int slopeTolerance = SLOPE_TOLERANCE;
-static int timerTolerance = TIMER_TOLERANCE;
-static uint8_t amplitudeThreshold = AMPLITUDE_THRESHOLD;
+static int slopeTolerance = DEFAULT_SLOPE_TOLERANCE;
+static int timerTolerance = DEFAULT_TIMER_TOLERANCE;
+static uint8_t amplitudeThreshold = DEFAULT_AMPLITUDE_THRESHOLD;
 
 static bool clipping;
 static int clippingPin;
@@ -157,8 +157,8 @@ void AudioFrequencyMeter::initializeVariables()
   amplitudeTimer = 0;
   maxAmplitude = 0;
   checkMaxAmp = 0;
-  minFrequency = MIN_FREQUENCY;
-  maxFrequency = MAX_FREQUENCY;
+  minFrequency = DEFAULT_MIN_FREQUENCY;
+  maxFrequency = DEFAULT_MAX_FREQUENCY;
 }
 
 void AudioFrequencyMeter::ADCconfigure()

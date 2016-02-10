@@ -30,11 +30,11 @@
 
 #pragma once
 
-#define AMPLITUDE_THRESHOLD     30
-#define TIMER_TOLERANCE         10
-#define SLOPE_TOLERANCE         3
-#define MIN_FREQUENCY           60.00
-#define MAX_FREQUENCY           1500.00
+#define DEFAULT_AMPLITUDE_THRESHOLD     30
+#define DEFAULT_TIMER_TOLERANCE         10
+#define DEFAULT_SLOPE_TOLERANCE         3
+#define DEFAULT_MIN_FREQUENCY           60.00
+#define DEFAULT_MAX_FREQUENCY           1500.00
 
 bool ADCisSyncing(void);
 uint8_t ADCread();
