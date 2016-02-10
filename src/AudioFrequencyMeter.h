@@ -42,7 +42,8 @@ uint8_t ADCread();
 class AudioFrequencyMeter {
   public:
 
-    AudioFrequencyMeter(void) {};
+    AudioFrequencyMeter();
+
     void begin(int pin, unsigned int sampleRate);
     void end(void);
     

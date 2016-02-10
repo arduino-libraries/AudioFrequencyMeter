@@ -33,8 +33,8 @@
 #define MIDPOINT                127
 #define TOPPOINT                255
 
-static int slopeTolerance = DEFAULT_SLOPE_TOLERANCE;
-static int timerTolerance = DEFAULT_TIMER_TOLERANCE;
+static int slopeTolerance;
+static int timerTolerance;
 
 static bool clipping;
 static int clippingPin;
@@ -59,13 +59,15 @@ static int newMaxAmplitude;                              // Variable used to che
 
 static volatile int checkMaxAmp;                         // Used to update the new frequency in base of the AMplitude threshold
 
+AudioFrequencyMeter::AudioFrequencyMeter() {
+  initializeVariables();
+}
+
 void AudioFrequencyMeter::begin(int pin, unsigned int rate)
 {
   samplePin = pin;                              // Store ADC channel to sample
   sampleRate = rate;                            // Store sample rate value
   analogRead(pin);                              // To start setting-up the ADC
-
-  amplitudeThreshold = DEFAULT_AMPLITUDE_THRESHOLD;
 
   ADCdisable();
   ADCconfigure();
@@ -136,6 +138,10 @@ float AudioFrequencyMeter::getFrequency()
 
 void AudioFrequencyMeter::initializeVariables()
 {
+  slopeTolerance = DEFAULT_SLOPE_TOLERANCE;
+  timerTolerance = DEFAULT_TIMER_TOLERANCE;
+  amplitudeThreshold = DEFAULT_AMPLITUDE_THRESHOLD;
+
   clipping = false;
   clippingPin = NOT_INITIALIZED;
   newData = 0;
