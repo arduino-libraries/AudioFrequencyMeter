@@ -30,17 +30,11 @@
 
 #pragma once
 
-#define ARRAY_DEPTH 				20
-#define AMPLITUDE_THRESHOLD	30
-#define TIMER_TOLERANCE			10
-#define SLOPE_TOLERANCE		 	3
-#define NOT_INITIALIZED			-1
-#define TIMER_TIMEOUT				1000
-#define MIN_FREQUENCY				60.00
-#define MAX_FREQUENCY				1500.00
-#define BOTTOMPOINT  				0
-#define MIDPOINT    				127
-#define TOPPOINT    				255
+#define DEFAULT_AMPLITUDE_THRESHOLD     30
+#define DEFAULT_TIMER_TOLERANCE         10
+#define DEFAULT_SLOPE_TOLERANCE         3
+#define DEFAULT_MIN_FREQUENCY           60.00
+#define DEFAULT_MAX_FREQUENCY           1500.00
 
 bool ADCisSyncing(void);
 uint8_t ADCread();
@@ -48,14 +42,15 @@ uint8_t ADCread();
 class AudioFrequencyMeter {
   public:
 
-    AudioFrequencyMeter(void) {};
-    void begin(uint32_t ulPin, uint32_t sampleRate);
+    AudioFrequencyMeter();
+
+    void begin(int pin, unsigned int sampleRate);
     void end(void);
     
     void setClippingPin(int pin);
     void checkClipping(void);
     
-    void setAmplitudeThreshold(uint8_t threshold);
+    void setAmplitudeThreshold(int threshold);
     void setTimerTolerance(int tolerance);
     void setSlopeTolerance(int tolerance);
     void setBandwidth(float minFrequency, float maxFrequency);
@@ -63,16 +58,25 @@ class AudioFrequencyMeter {
     float getFrequency(void);
     
   private:
-  	void initializeVariables(void);
-		void ADCconfigure();
-		void ADCenable(void);
-		void ADCdisable(void);
-    void ADCsetMux(uint32_t ulPin);
+    void initializeVariables(void);
+    void ADCconfigure();
+    void ADCenable(void);
+    void ADCdisable(void);
+    void ADCsetMux(void);
     
-    void tcConfigure(uint32_t sampleRate);
+    void tcConfigure(void);
     bool tcIsSyncing(void);
     void tcEnable(void);
     void tcDisable(void);
     void tcReset(void);
+
+  private:
+    int samplePin;           // Pin used to sample the signal
+    unsigned int sampleRate; // ADC sample rate
+
+    int amplitudeThreshold;
+
+    float minFrequency;      // Variable to store the minimum frequency that can be applied in input
+    float maxFrequency;      // Variable to store the maximum frequency that can be applied in input
 };
 
