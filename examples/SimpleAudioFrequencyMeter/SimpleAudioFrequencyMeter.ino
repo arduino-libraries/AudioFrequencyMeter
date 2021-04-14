@@ -5,7 +5,7 @@
 
   This example code is in the public domain
 
-  http://arduino.cc/en/Tutorial/SimpleAudioFrequencyMeter
+  https://www.arduino.cc/en/Tutorial/SimpleAudioFrequencyMeter
 
   created by Arturo Guadalupi <a.guadalupi@arduino.cc>
   10 Nov 2015
@@ -21,7 +21,7 @@ void setup() {
   Serial.println("started");
 
   meter.setBandwidth(70.00, 1500);    // Ignore frequency out of this range
-  meter.begin(A0, 45000);             // Intialize A0 at sample rate of 45kHz
+  meter.begin(A0, 45000);             // Initialize A0 at sample rate of 45 kHz
 }
 
 void loop() {

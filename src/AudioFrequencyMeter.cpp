@@ -1,5 +1,5 @@
 /*
-  Audio Frequencimeter library for Arduino Zero.
+  AudioFrequencyMeter library for Arduino Zero.
   Copyright (c) 2015 Arduino LLC. All right reserved.
 
   This library is free software; you can redistribute it and/or
@@ -57,7 +57,7 @@ static unsigned int amplitudeTimer;                      // Variable to reset tr
 static int maxAmplitude;                                 // Variable to store the max detected amplitude
 static int newMaxAmplitude;                              // Variable used to check if maxAmplitude must be updated
 
-static volatile int checkMaxAmp;                         // Used to update the new frequency in base of the AMplitude threshold
+static volatile int checkMaxAmp;                         // Used to update the new frequency in base of the amplitude threshold
 
 AudioFrequencyMeter::AudioFrequencyMeter() {
   initializeVariables();
@@ -67,7 +67,7 @@ void AudioFrequencyMeter::begin(int pin, unsigned int rate)
 {
   samplePin = pin;                              // Store ADC channel to sample
   sampleRate = rate;                            // Store sample rate value
-  analogRead(pin);                              // To start setting-up the ADC
+  analogRead(pin);                              // To start setting up the ADC
 
   ADCdisable();
   ADCconfigure();
