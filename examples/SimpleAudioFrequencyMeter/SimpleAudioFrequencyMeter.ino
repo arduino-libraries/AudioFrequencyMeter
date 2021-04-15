@@ -27,7 +27,7 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   float frequency = meter.getFrequency();
-  if (frequency > 0)
+  if (frequency >= 0)
   {
     Serial.print(frequency);
     Serial.println(" Hz");
