@@ -1,4 +1,11 @@
-= Audio Frequency Meter Library for Arduino =
+:repository-owner: arduino-libraries
+:repository-name: AudioFrequencyMeter
+
+= {repository-name} Library for Arduino =
+
+image:https://github.com/{repository-owner}/{repository-name}/actions/workflows/check-arduino.yml/badge.svg["Check Arduino status", link="https://github.com/{repository-owner}/{repository-name}/actions/workflows/check-arduino.yml"]
+image:https://github.com/{repository-owner}/{repository-name}/actions/workflows/compile-examples.yml/badge.svg["Compile Examples status", link="https://github.com/{repository-owner}/{repository-name}/actions/workflows/compile-examples.yml"]
+image:https://github.com/{repository-owner}/{repository-name}/actions/workflows/spell-check.yml/badge.svg["Spell Check status", link="https://github.com/{repository-owner}/{repository-name}/actions/workflows/spell-check.yml"]
 
 Allows the Arduino Zero and MKR1000 to sample a generic input audio signal and get the fundamental pitch.
 
@@ -22,7 +29,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 == Methods ==
-* begin(uint32_t ulPin, uint32_t sampleRate) : initialize the ADC so sample ulPin at the chosen sample rate. This process works in interrupt using TC5 to start the sampling process. ADC resolution is set to 8 bit
+* begin(uint32_t ulPin, uint32_t sampleRate) : initialize the ADC to sample ulPin at the chosen sample rate. This process works in interrupt using TC5 to start the sampling process. ADC resolution is set to 8 bit
 
 * end() : stops the sampling process disabling both the ADC and TC5 and resetting TC5
 
@@ -30,12 +37,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 * checkClipping : checks if there is a clipping event (converted value equals to the top or the bottom of the ADC dynamic) and drives HIGH the clippingPin
 
-* setAmplitudeThreshold(uint8_t threshold) sets the threshold for which a detected frequency is considered right or wrong. Default is 30
+* setAmplitudeThreshold(uint8_t threshold) : sets the threshold for which a detected frequency is considered right or wrong. Default is 30
 
 * setTimerTolerance(int tolerance)  : sets the tolerance for which a sampled signal is considered valid. Default is 10
 
 * setSlopeTolerance(int tolerance) : sets the tolerance for which the slope is valid for the trigger process. Default is 3
 
-* setBandwidth(float minFrequency, float maxFrequency) : set the range of frequencies for which the detected frequency is valid. Default values for now are 60Hz - 1500Hz. This must be improved 
+* setBandwidth(float minFrequency, float maxFrequency) : set the range of frequencies for which the detected frequency is valid. Default values for now are 60 Hz - 1500 Hz. This must be improved 
 
-* getFrequency : return the value of the detected frequency if it is above the threshold defined by setAmplitudeThreshold else -1
+* getFrequency : return the value of the detected frequency if it is above the threshold defined by setAmplitudeThreshold, else -1

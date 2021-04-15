@@ -1,5 +1,5 @@
 /*
-  Audio Frequencimeter library for Arduino Zero.
+  AudioFrequencyMeter library for Arduino Zero.
   Copyright (c) 2015 Arduino LLC. All right reserved.
 
   This library is free software; you can redistribute it and/or
@@ -79,4 +79,3 @@ class AudioFrequencyMeter {
     float minFrequency;      // Variable to store the minimum frequency that can be applied in input
     float maxFrequency;      // Variable to store the maximum frequency that can be applied in input
 };
-
